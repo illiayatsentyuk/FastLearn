@@ -21,9 +21,12 @@ exports.postSignup = async (req, res, next) => {
       password: hashedPassword,
     });
     const savedUser = await user.save();
-    res
-      .status(201)
-      .json({ message: "User created successfully", user: savedUser });
+    const token = jwt.sign(
+      { email: savedUser.email, userId: savedUser._id.toString() },
+      "secret",
+      { expiresIn: "1h" }
+    );
+    res.status(201).json({ token, userId: savedUser._id.toString() });
   } catch (err) {
     next(err);
   }
@@ -49,7 +52,7 @@ exports.postLogin = async (req, res, next) => {
       "secret",
       { expiresIn: "1h" }
     );
-    res.status(200).json({ token: token, user: user });
+    res.status(200).json({ token: token, userId: user._id.toString() });
   } catch (err) {
     next(err);
   }
